@@ -30,7 +30,7 @@ def generate_transaction():
             'amount': round(random.uniform(5.0, 3000.0), 2),
             'store': random.choice(sklepy),
             'category': random.choice(kategorie),
-            'hour': random.randint(6, 23),  
+            'hour': random.randint(6, 22),  
             'timestamp': datetime.now().isoformat(),
         }
 
