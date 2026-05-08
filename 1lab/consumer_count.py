@@ -17,24 +17,21 @@ msg_count = 0
 for message in consumer:
     tx = message.value
     store = tx['store']
-    amount = tx['amount']
     
 
     store_counts[store] += 1
     
-   
-    total_amount[store] += amount
+    total_amount[store] += tx['amount']
     
     msg_count += 1
 
     
     if msg_count % 10 == 0:
-        print("\n PODSUMOWANIE (co 10 wiadomości):")
-        print("-" * 50)
-        print(f"{'Sklep':<12} | {'Liczba':<6} | {'Suma (PLN)':<12}")
-        print("-" * 50)
-        
-        for store in store_counts:
-            print(f"{store:<12} | {store_counts[store]:<6} | {total_amount[store]:<12.2f}")
-        
-        print("-" * 50)
+        print(f"\n{'='*52}")
+        print(f"{'Sklep':<12} {'Liczba':>8} {'Suma':>12} {'Śr.':>10}")
+        print(f"{'-'*52}")
+        for s in sorted(store_counts):
+            n = store_counts[s]
+            tot = total_amount[s]
+            print(f"{s:<12} {n:>8} {tot:>12.2f} {tot/n:>10.2f}")
+        print(f"{'='*52}\nŁącznie: {msg_count} wiadomości\n")
