@@ -4,6 +4,8 @@ import json
 consumer = KafkaConsumer(
     'transactions',
     bootstrap_servers='broker:9092',
+    auto_offset_reset='earliest',
+    group_id='filter-group',
     value_deserializer=lambda x: json.loads(x.decode('utf-8'))
 )
 
@@ -14,7 +16,5 @@ for message in consumer:
         print(
             f" ALERT | {tx['tx_id']} | "
             f"{tx['amount']:.2f} PLN | "
-            f"{tx['store']} | "
-            f"kategoria: {tx['category']} | "
-            f"godz: {tx.get('hour', 'brak')}"
+            f"{tx['store']}"
         )
