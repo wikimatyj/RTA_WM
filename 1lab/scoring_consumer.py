@@ -1,4 +1,5 @@
 from kafka import KafkaConsumer, KafkaProducer
+from datetime import datetime
 import json
 
 consumer = KafkaConsumer(
@@ -18,44 +19,21 @@ def score_transaction(tx):
     score = 0
     rules = []
     
-    amount = tx.get('amount', 0)
-    category = tx.get('category', '')
-    hour = int(tx.get('timestamp', '1970-01-01T00:00:00')[11:13])
-    
-    if amount > 3000:
-        score += 3
-        rules.append('R1')
-        
-    if category == 'elektronika' and amount > 1500:
-        score += 2
-        rules.append('R2')
-        
+    if tx['amount'] > 3000:
+        score += 3; rules.append('R1')
+    if tx.get('category')== 'elektronika' and tx['amount'] > 1500:
+        score += 2; rules.append('R2')
+    hour= tx.get('hour', datetime.fromisoformat(tx['timestamp']).hour)
     if hour < 6:
-        score += 2
-        rules.append('R3')
-    
+        score += 2; rules.append('R3')
     return score, rules
-
+print("Konsument scoringowy uruchomiony...\n")
 
 for message in consumer:
     tx = message.value
-    
-    score, rules = score_transaction(tx)
-    
+    score, rules= score_transaction(tx)
     if score >= 3:
-        
-        tx['score'] = score
-        tx['rules_triggered'] = rules
-        tx['alert'] = True
-        
-        
-        alert_producer.send('alerts', value=tx)
-        
-        print(
-            f" ALERT | {tx['tx_id']} | "
-            f"{tx['amount']:.2f} PLN | "
-            f"score: {score} | rules: {rules}"
-        )
-
+        alert= {**tx, 'score': score, 'rules': rules, 'alert': True}
+        alert_producer.send('alerts', value=alert)
+        print(f"ALERT [{score}p] {tx['tx_id']} | {tx['amount']:.2f} PLN | reguły: {rules}")
 alert_producer.flush()
-alert_producer.close()
